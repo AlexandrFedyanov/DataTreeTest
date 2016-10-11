@@ -1,5 +1,7 @@
 package com.test.afedyanov.datatree.model;
 
+import android.util.SparseArray;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,7 +12,7 @@ import java.util.List;
  */
 public class DataBase implements ITreeDataSet {
 
-    private List<Node> datas = new ArrayList<>();
+    private SparseArray<Node> datas = new SparseArray<>();
 
     private final String baseNodeName = "Node ";
     private int createdNodesCounter = 0;
@@ -26,18 +28,34 @@ public class DataBase implements ITreeDataSet {
         fillData();
     }
 
-    public Node getNode(int id) {
-        return datas.get(id);
+    public void applyChanges(List<Node> newNodes) {
+        for (Node node : newNodes) {
+            if (node.getId() < 0) {// new item
+                int newId = getElementForPosition(datas.size() - 1).getId() + 1;
+                Node root = getElementById(node.getId());
+                if (root != null) {
+                    root.getNodesIds().remove(node.getId());
+                    root.addChildren(newId);
+                }
+                node.setId(newId);
+            }
+            addData(node);
+            if (!node.isValid()) {
+                removeBranch(node);
+            }
+        }
     }
 
-    public List<Node> getNodes() {
-        List<Node> copiedNodes = new ArrayList<>();
-        copiedNodes.addAll(datas);
-        return copiedNodes;
+    private void removeBranch(Node root) {
+        for (int childId : root.getNodesIds()) {
+            Node child = getElementById(childId);
+            child.setValid(false);
+            removeBranch(child);
+        }
     }
 
     private void addData(Node node) {
-        datas.add(node);
+        datas.put(node.getId(), node);
     }
 
     public Node loadNodeById(int id) {
@@ -52,7 +70,7 @@ public class DataBase implements ITreeDataSet {
 
     @Override
     public Node getElementForPosition(int position) {
-        return datas.get(position);
+        return datas.get(datas.keyAt(position));
     }
 
 
@@ -77,13 +95,7 @@ public class DataBase implements ITreeDataSet {
         treeRoot.setId(createdNodesCounter);
         treeRoot.setValue(baseNodeName + ++createdNodesCounter);
         addData(treeRoot);
-        addChilds(treeRoot, getChildCount(createdNodesCounter), 0, 4);
-        Collections.sort(datas, new Comparator<Node>() {
-            @Override
-            public int compare(Node left, Node right) {
-                return left.getId() - right.getId();
-            }
-        });
+        addChilds(treeRoot, getChildCount(createdNodesCounter), 0, 5);
     }
 
     private void addChilds(Node root, int childCount, int currentDepth, int maxDepth) {

@@ -9,5 +9,6 @@
     <color name="activeText">#262626</color>
     <color name="disabledText">#b6b6b6</color>
 
-    <color name="selectedItem">#98374586</color>
+    <color name="selectedItem">#82374586</color>
+    <color name="pressedItem">#28374586</color>
 </resources>
