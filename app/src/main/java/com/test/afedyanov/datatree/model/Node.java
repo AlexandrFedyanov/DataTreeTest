@@ -52,8 +52,17 @@ public class Node {
         return nodesIds;
     }
 
-    public void addChildren(Integer... nodes) {
-        Collections.addAll(this.nodesIds, nodes);
+    public void addChildren(int nodeId) {
+        nodesIds.add(nodeId);
+    }
+
+    public void removeChildren(int nodeId) {
+        for (Integer id: nodesIds) {
+            if (id == nodeId) {
+                nodesIds.remove(id);
+                break;
+            }
+        }
     }
 
     public int getId() {
