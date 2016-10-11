@@ -3,4 +3,11 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <color name="treeFrame">#8e8e8e</color>
+
+    <color name="activeText">#262626</color>
+    <color name="disabledText">#b6b6b6</color>
+
+    <color name="selectedItem">#98374586</color>
 </resources>

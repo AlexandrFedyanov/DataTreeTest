@@ -1,14 +1,14 @@
 package com.test.afedyanov.datatree.model;
 
-import android.util.Log;
-
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * Created by Alexandr on 10.10.2016.
  */
-public class DataBase {
+public class DataBase implements ITreeDataSet {
 
     private List<Node> datas = new ArrayList<>();
 
@@ -26,20 +26,64 @@ public class DataBase {
         fillData();
     }
 
+    public Node getNode(int id) {
+        return datas.get(id);
+    }
+
+    public List<Node> getNodes() {
+        List<Node> copiedNodes = new ArrayList<>();
+        copiedNodes.addAll(datas);
+        return copiedNodes;
+    }
+
+    private void addData(Node node) {
+        datas.add(node);
+    }
+
+    public Node loadNodeById(int id) {
+        return Node.copy(getElementById(id));
+    }
+    @Override
+    public Node getElementById(Integer id) {
+        if (id == null)
+            return null;
+        return datas.get(id);
+    }
+
+    @Override
+    public Node getElementForPosition(int position) {
+        return datas.get(position);
+    }
+
+
+    @Override
+    public int getElementsCount() {
+        return datas.size();
+    }
+
+    @Override
+    public int getElementDepthOnTree(Node node) {
+        Node root = getElementById(node.getRootId());
+        int depth = 0;
+        while (root != null) {
+            depth++;
+            root = getElementById(root.getRootId());
+        }
+        return depth;
+    }
+
     private void fillData() {
         Node treeRoot = new Node();
+        treeRoot.setId(createdNodesCounter);
         treeRoot.setValue(baseNodeName + ++createdNodesCounter);
-        datas.add(treeRoot);
+        addData(treeRoot);
         addChilds(treeRoot, getChildCount(createdNodesCounter), 0, 4);
-        for (Node node : datas) {
-            Node root = node.getRoot();
-            String space = "";
-            while (root != null) {
-                space+=" ";
-                root = root.getRoot();
+        Collections.sort(datas, new Comparator<Node>() {
+            @Override
+            public int compare(Node left, Node right) {
+                return left.getId() - right.getId();
             }
-            Log.d("node", space + node.getValue());
-        }
+        });
     }
 
     private void addChilds(Node root, int childCount, int currentDepth, int maxDepth) {
@@ -47,10 +91,11 @@ public class DataBase {
             childCount = 2;
         for (int i = 0; i < childCount; i++) {
             Node child = new Node();
+            child.setId(createdNodesCounter);
             child.setValue(baseNodeName + ++createdNodesCounter);
-            child.setRoot(root);
-            root.getNodes().add(child);
-            datas.add(child);
+            child.setRootId(root.getId());
+            root.addChildren(child.getId());
+            addData(child);
             if (currentDepth != maxDepth) {
                 addChilds(child, getChildCount(createdNodesCounter), currentDepth + 1, maxDepth);
             }

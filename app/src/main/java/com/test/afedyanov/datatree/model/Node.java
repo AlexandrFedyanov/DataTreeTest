@@ -1,17 +1,28 @@
 package com.test.afedyanov.datatree.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Created by Alexandr on 10.10.2016.
  */
 public class Node {
-    private int id;
+    private int id = -1;
     private String value;
-    private Node root;
-    private List<Node> nodes = new ArrayList<>();
+    private Integer rootId;
+    private List<Integer> nodesIds = new ArrayList<>();
     private boolean isValid = true;
+
+    public static Node copy(Node node) {
+        Node copiedNode = new Node();
+        copiedNode.setId(node.getId());
+        copiedNode.setRootId(node.getRootId());
+        copiedNode.setValue(node.getValue());
+        copiedNode.getNodesIds().addAll(node.getNodesIds());
+        copiedNode.setValid(node.isValid());
+        return copiedNode;
+    }
 
     public boolean isValid() {
         return isValid;
@@ -29,20 +40,20 @@ public class Node {
         this.value = value;
     }
 
-    public Node getRoot() {
-        return root;
+    public Integer getRootId() {
+        return rootId;
     }
 
-    public void setRoot(Node root) {
-        this.root = root;
+    public void setRootId(Integer rootId) {
+        this.rootId = rootId;
     }
 
-    public List<Node> getNodes() {
-        return nodes;
+    public List<Integer> getNodesIds() {
+        return nodesIds;
     }
 
-    public void setNodes(List<Node> nodes) {
-        this.nodes = nodes;
+    public void addChildren(Integer... nodes) {
+        Collections.addAll(this.nodesIds, nodes);
     }
 
     public int getId() {
