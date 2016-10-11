@@ -27,7 +27,7 @@ public class DataBase extends BaseTreeSet {
         Collections.sort(newNodes, new Comparator<Node>() {
             @Override
             public int compare(Node left, Node right) {
-                return left.getId() < right.getId() ? 1 : 0; // apply changes to old nodes first
+                return left.getId() > right.getId() ?  - 1 : left.getId() == right.getId() ?  0 : 1; // apply changes to old nodes first
             }
         });
         for (Node node : newNodes) {
