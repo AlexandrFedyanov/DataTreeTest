@@ -3,6 +3,8 @@ package com.test.afedyanov.datatree;
 import android.content.DialogInterface;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,14 +17,18 @@ import android.widget.LinearLayout;
 
 import com.test.afedyanov.datatree.model.ITreeDataSet;
 import com.test.afedyanov.datatree.presenter.MainPresenter;
+import com.test.afedyanov.datatree.presenter.PresenterFactory;
 import com.test.afedyanov.datatree.presenter.presenterinterface.IMainPresenter;
+import com.test.afedyanov.datatree.presenter.presenterloader.MainPresenterLoader;
 import com.test.afedyanov.datatree.view.TreeView;
 import com.test.afedyanov.datatree.view.viewinterface.IMainView;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements IMainView {
+public class MainActivity extends AppCompatActivity implements IMainView, LoaderManager.LoaderCallbacks<IMainPresenter> {
+
+    private final int PRESENTER_LOADER_ID = 1001;
 
     @Bind(R.id.mainRootView) CoordinatorLayout mainRootView;
     @Bind(R.id.dataTreeView) TreeView dataTreeView;
@@ -43,8 +49,8 @@ public class MainActivity extends AppCompatActivity implements IMainView {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        presenter = new MainPresenter();
         setupControls();
+        getSupportLoaderManager().initLoader(PRESENTER_LOADER_ID, null, this);
     }
 
     @Override
@@ -57,12 +63,6 @@ public class MainActivity extends AppCompatActivity implements IMainView {
     protected void onPause() {
         super.onPause();
         presenter.detachView();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        presenter.destroy();
     }
 
     private void setupControls() {
@@ -183,5 +183,25 @@ public class MainActivity extends AppCompatActivity implements IMainView {
         layoutParams.setMargins(margin, margin, margin, margin);
         input.setLayoutParams(layoutParams);
         return input;
+    }
+
+    @Override
+    public Loader<IMainPresenter> onCreateLoader(int id, Bundle args) {
+        return new MainPresenterLoader(this, new PresenterFactory<IMainPresenter>() {
+            @Override
+            public IMainPresenter createPresenter() {
+                return new MainPresenter();
+            }
+        });
+    }
+
+    @Override
+    public void onLoadFinished(Loader<IMainPresenter> loader, IMainPresenter data) {
+        presenter = data;
+    }
+
+    @Override
+    public void onLoaderReset(Loader<IMainPresenter> loader) {
+        presenter = null;
     }
 }
