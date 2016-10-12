@@ -8,12 +8,8 @@ import android.widget.FrameLayout;
 
 import com.test.afedyanov.datatree.R;
 import com.test.afedyanov.datatree.model.ITreeDataSet;
-import com.test.afedyanov.datatree.model.Node;
 import com.test.afedyanov.datatree.view.adapter.TreeAdapter;
 import com.test.afedyanov.datatree.view.viewinterface.ITreeView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;

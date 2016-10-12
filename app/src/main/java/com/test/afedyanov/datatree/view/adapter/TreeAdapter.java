@@ -50,6 +50,8 @@ public class TreeAdapter extends RecyclerView.Adapter<TreeAdapter.NodeViewHolder
 
     @Override
     public int getItemCount() {
+        if (dataSet == null)
+            return 0;
         return dataSet.getElementsCount();
     }
 
