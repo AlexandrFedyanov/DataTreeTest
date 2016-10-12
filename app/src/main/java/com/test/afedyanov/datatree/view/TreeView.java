@@ -28,6 +28,7 @@ public class TreeView extends FrameLayout implements ITreeView {
         LayoutInflater.from(context).inflate(R.layout.view_tree_layout, this, true);
         ButterKnife.bind(this, this);
         treeAdapter = new TreeAdapter();
+        treeAdapter.setHasStableIds(true);
         nodesRecyclerView.setAdapter(treeAdapter);
     }
 

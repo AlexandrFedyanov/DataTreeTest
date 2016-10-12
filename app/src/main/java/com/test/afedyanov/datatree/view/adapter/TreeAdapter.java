@@ -53,6 +53,11 @@ public class TreeAdapter extends RecyclerView.Adapter<TreeAdapter.NodeViewHolder
         return dataSet.getElementsCount();
     }
 
+    @Override
+    public long getItemId(int position) {
+        return dataSet.getElementForPosition(position).getId();
+    }
+
     public class NodeViewHolder extends RecyclerView.ViewHolder {
         @Bind(R.id.rootView) View rootView;
         @Bind(R.id.depthSpace)
