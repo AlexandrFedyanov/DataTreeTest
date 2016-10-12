@@ -15,6 +15,10 @@ public interface IMainPresenter {
 
     void remove(int selectedId);
 
+    void onAddClick(int selectedId);
+
+    void onEditClick(int selectedId);
+
     void add(int selectedId, String value);
 
     void edit(int selectedId, String newValue);

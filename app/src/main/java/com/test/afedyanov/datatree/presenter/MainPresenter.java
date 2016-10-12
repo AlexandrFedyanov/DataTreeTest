@@ -3,6 +3,7 @@ package com.test.afedyanov.datatree.presenter;
 import com.test.afedyanov.datatree.R;
 import com.test.afedyanov.datatree.model.DataBase;
 import com.test.afedyanov.datatree.model.LocalCache;
+import com.test.afedyanov.datatree.model.Node;
 import com.test.afedyanov.datatree.presenter.presenterinterface.IMainPresenter;
 import com.test.afedyanov.datatree.view.viewinterface.IMainView;
 
@@ -52,6 +53,17 @@ public class MainPresenter extends BasePresenter<IMainView> implements IMainPres
     public void remove(int selectedId) {
         localCache.setDeleted(localCache.getElementById(selectedId));
         view.notifyCacheDataChanged();
+    }
+
+    @Override
+    public void onAddClick(int selectedId) {
+        view.showCreateDialog(selectedId, "New node");
+    }
+
+    @Override
+    public void onEditClick(int selectedId) {
+        Node currentNode = localCache.getElementById(selectedId);
+        view.showEditDialog(selectedId, currentNode.getValue());
     }
 
     @Override

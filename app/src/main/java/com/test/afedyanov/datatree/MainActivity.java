@@ -96,13 +96,13 @@ public class MainActivity extends AppCompatActivity implements IMainView {
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showEditDialog(cacheTreeView.getCurrentSelection());
+                presenter.onEditClick(cacheTreeView.getCurrentSelection());
             }
         });
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showCreateDialog(cacheTreeView.getCurrentSelection());
+                presenter.onAddClick(cacheTreeView.getCurrentSelection());
             }
         });
         applyButton.setOnClickListener(new View.OnClickListener() {
@@ -138,8 +138,10 @@ public class MainActivity extends AppCompatActivity implements IMainView {
         cacheTreeView.setData(localCacheData);
     }
 
-    private void showEditDialog(final int currentSelection) {
+    @Override
+    public void showEditDialog(final int currentSelection, String value) {
         final EditText input = createInputLayout();
+        input.setText(value);
         showInputDialog(input, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -149,8 +151,10 @@ public class MainActivity extends AppCompatActivity implements IMainView {
         });
     }
 
-    private void showCreateDialog(final int currentSelection) {
+    @Override
+    public void showCreateDialog(final int currentSelection, String value) {
         final EditText input = createInputLayout();
+        input.setText(value);
         showInputDialog(input, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -175,6 +179,8 @@ public class MainActivity extends AppCompatActivity implements IMainView {
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
+        int margin = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin);
+        layoutParams.setMargins(margin, margin, margin, margin);
         input.setLayoutParams(layoutParams);
         return input;
     }

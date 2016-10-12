@@ -1,5 +1,7 @@
 package com.test.afedyanov.datatree.model;
 
+import android.util.SparseIntArray;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -30,13 +32,22 @@ public class DataBase extends BaseTreeSet {
                 return left.getId() > right.getId() ?  - 1 : left.getId() == right.getId() ?  0 : 1; // apply changes to old nodes first
             }
         });
+        SparseIntArray generatedIds = new SparseIntArray();
         for (Node node : newNodes) {
             if (node.getId() < 0) {// new item
                 int newId = ++createdNodesCounter;
-                Node root = getElementById(node.getRootId());
-                if (root != null) {
-                    root.removeChildren(node.getId());
-                    root.addChildren(newId);
+                generatedIds.put(node.getId(), newId);
+                if (node.getRootId() != null && node.getRootId() < 0) {
+                    node.setRootId(generatedIds.get(node.getRootId(), node.getRootId()));
+                }
+                if (node.getRootId() >= 0) {
+                    Node root = getElementById(node.getRootId());
+                    if (root != null) {
+                        root.removeChildren(node.getId());
+                        root.addChildren(newId);
+                        if (!root.isValid())
+                            node.setValid(false);
+                    }
                 }
                 node.setId(newId);
             }

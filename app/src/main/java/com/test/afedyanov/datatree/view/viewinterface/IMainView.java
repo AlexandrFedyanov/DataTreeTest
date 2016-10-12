@@ -11,5 +11,9 @@ public interface IMainView {
 
     void setLocalCacheData(ITreeDataSet localCacheData);
 
+    void showEditDialog(int selectedId, String value);
+
+    void showCreateDialog(int selectedId, String value);
+
     void showMessage(int messageRes);
 }

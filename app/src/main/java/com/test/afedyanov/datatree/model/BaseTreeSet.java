@@ -12,7 +12,7 @@ import java.util.List;
 public class BaseTreeSet implements ITreeDataSet {
 
     protected SparseArray<Node> nodes = new SparseArray<>();
-    protected int[] orderedIds;
+    private int[] orderedIds;
 
     @Override
     public Node getElementById(Integer id) {
