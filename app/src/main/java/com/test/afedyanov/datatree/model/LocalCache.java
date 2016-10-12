@@ -22,10 +22,27 @@ public class LocalCache extends BaseTreeSet {
     }
 
     public void addNode(Node node) {
+        Node sameNode = getElementById(node.getId());
+        if (sameNode != null)
+            mergeNode(node, sameNode);
         nodes.put(node.getId(), node);
         if (checkIsDeleted(node))
             node.setValid(false);
         orderElements();
+    }
+
+    private void mergeNode(Node newNode, Node oldNode) {
+        for (int oldChildId : oldNode.getNodesIds()) {
+            boolean hasSameChild = false;
+            for (int newChildId: newNode.getNodesIds()) {
+                if (newChildId == oldChildId) {
+                    hasSameChild = true;
+                    break;
+                }
+            }
+            if (!hasSameChild)
+                newNode.addChildren(oldChildId);
+        }
     }
 
     public void createNode(int rootId, String value) {
