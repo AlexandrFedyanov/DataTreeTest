@@ -25,7 +25,12 @@ public class DataBase extends BaseTreeSet {
         fillData();
     }
 
-    public void applyChanges(List<Node> newNodes) {
+    /**
+     * @param newNodes nodes to save, for new created node id must be negative!!!
+     * @return id of elements witch was created as {@link SparseIntArray} with key - new element
+     * sent id value, value - new generated id value
+     */
+    public SparseIntArray applyChanges(List<Node> newNodes) {
         Collections.sort(newNodes, new Comparator<Node>() {
             @Override
             public int compare(Node left, Node right) {
@@ -57,6 +62,7 @@ public class DataBase extends BaseTreeSet {
             }
         }
         orderElements();
+        return generatedIds;
     }
 
     private void addData(Node node) {

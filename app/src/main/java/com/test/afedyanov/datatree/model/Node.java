@@ -75,8 +75,9 @@ public class Node {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof Node)
+        if (o instanceof Node) {
             return ((Node) o).getId() == getId();
+        }
         return super.equals(o);
     }
 }

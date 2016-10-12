@@ -8,12 +8,14 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.test.afedyanov.datatree.model.ITreeDataSet;
 import com.test.afedyanov.datatree.presenter.MainPresenter;
@@ -164,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements IMainView, Loader
         });
     }
 
-    private void showInputDialog(View input, DialogInterface.OnClickListener listener) {
+    private void showInputDialog(EditText input, DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(this)
                 .setView(input)
                 .setTitle(R.string.input_message)
@@ -175,7 +177,8 @@ public class MainActivity extends AppCompatActivity implements IMainView, Loader
 
     private EditText createInputLayout() {
         final EditText input = new EditText(this);
-        input.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+        input.setSingleLine(true);
+        input.setImeOptions(EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_EXTRACT_UI);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);

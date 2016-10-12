@@ -23,7 +23,7 @@ public class BaseTreeSet implements ITreeDataSet {
 
     @Override
     public Node getElementForPosition(int position) {
-        int orderedPosition = orderedIds.length > position ? orderedIds[position] : position;
+        int orderedPosition =  orderedIds != null && orderedIds.length > position ? orderedIds[position] : position;
         return nodes.get(orderedPosition);
     }
 

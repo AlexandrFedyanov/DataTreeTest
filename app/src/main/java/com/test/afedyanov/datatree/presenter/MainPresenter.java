@@ -51,19 +51,31 @@ public class MainPresenter extends BasePresenter<IMainView> implements IMainPres
 
     @Override
     public void remove(int selectedId) {
-        localCache.setDeleted(localCache.getElementById(selectedId));
-        view.notifyCacheDataChanged();
+        if (localCache.getElementById(selectedId) == null) {
+            view.showMessage(R.string.no_selection_error);
+        } else {
+            localCache.setDeleted(localCache.getElementById(selectedId));
+            view.notifyCacheDataChanged();
+        }
     }
 
     @Override
     public void onAddClick(int selectedId) {
-        view.showCreateDialog(selectedId, "New node");
+        if (localCache.getElementById(selectedId) == null) {
+            view.showMessage(R.string.no_selection_error);
+        } else {
+            view.showCreateDialog(selectedId, "New node");
+        }
     }
 
     @Override
     public void onEditClick(int selectedId) {
-        Node currentNode = localCache.getElementById(selectedId);
-        view.showEditDialog(selectedId, currentNode.getValue());
+        if (localCache.getElementById(selectedId) == null) {
+            view.showMessage(R.string.no_selection_error);
+        } else {
+            Node currentNode = localCache.getElementById(selectedId);
+            view.showEditDialog(selectedId, currentNode.getValue());
+        }
     }
 
     @Override
@@ -80,9 +92,7 @@ public class MainPresenter extends BasePresenter<IMainView> implements IMainPres
 
     @Override
     public void apply() {
-        dataBase.applyChanges(localCache.getNodes());
-        localCache.clear();
-        view.notifyCacheDataChanged();
+        localCache.setCreatedElementsIds(dataBase.applyChanges(localCache.getNodes()));
         view.notifyDataBaseDataChanged();
     }
 }

@@ -26,7 +26,7 @@ public class TreeAdapter extends RecyclerView.Adapter<TreeAdapter.NodeViewHolder
 
     public int getCurrentSelectedId() {
         Node selectedElement = dataSet.getElementForPosition(currentSelectedItemPosition);
-        if (selectedElement.isValid())
+        if (selectedElement != null && selectedElement.isValid())
             return dataSet.getElementForPosition(currentSelectedItemPosition).getId();
         return -1;
     }

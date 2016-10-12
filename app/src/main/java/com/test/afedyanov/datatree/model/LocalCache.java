@@ -1,5 +1,7 @@
 package com.test.afedyanov.datatree.model;
 
+import android.util.SparseIntArray;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +13,7 @@ public class LocalCache extends BaseTreeSet {
         List<Node> copiedNodes = new ArrayList<>();
         for(int i = 0; i < nodes.size(); i++) {
             int key = nodes.keyAt(i);
-            copiedNodes.add(nodes.get(key));
+            copiedNodes.add(Node.copy(nodes.get(key)));
         }
         return copiedNodes;
     }
@@ -54,6 +56,29 @@ public class LocalCache extends BaseTreeSet {
         if (root != null)
             root.addChildren(node.getId());
         addNode(node);
+    }
+
+    public void setCreatedElementsIds(SparseIntArray generatedIds) {
+        for (int i = 0; i < generatedIds.size(); i++) {
+            int localId = generatedIds.keyAt(i);
+            Node node = getElementById(localId);
+            if (node != null) {
+                node.setId(generatedIds.get(localId));
+                nodes.remove(localId);
+                nodes.put(node.getId(), node);
+                for (int childId: node.getNodesIds()) {
+                    Node child = getElementById(childId);
+                    if (child != null)
+                        child.setRootId(node.getId());
+                }
+                Node root = getElementById(node.getRootId());
+                if (root != null) {
+                    root.removeChildren(localId);
+                    root.addChildren(node.getId());
+                }
+            }
+        }
+        orderElements();
     }
 
     public void editNode(int nodeId, String value) {
