@@ -65,18 +65,11 @@ public class LocalCache extends BaseTreeSet {
         for (int i = 0; i < savedElements.size(); i++) {
             int localId = savedElements.keyAt(i);
             Node savedNode = savedElements.get(localId);
-            nodes.remove(localId);
-            nodes.put(savedNode.getId(), savedNode);
-            for (int childId: savedNode.getNodesIds()) {
-                Node child = getElementById(childId);
-                if (child != null)
-                    child.setRootId(savedNode.getId());
-            }
-            Node root = getElementById(savedNode.getRootId());
-            if (root != null) {
-                root.removeChildren(localId);
-                root.addChildren(savedNode.getId());
-            }
+            if (localId != savedNode.getId()) {
+                nodes.remove(localId);
+                nodes.put(savedNode.getId(), savedNode);
+            } else
+                addNode(savedNode);
         }
         orderElements();
     }

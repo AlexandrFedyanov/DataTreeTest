@@ -42,19 +42,20 @@ public class DataBase extends BaseTreeSet {
         for (Node node : newNodes) {
             int originalId = node.getId();
             if (node.getId() < 0) {// new item
+                int newId = generateItemId();
                 if (node.getRootId() != null && node.getRootId() < 0) {
                     node.setRootId(newIds.get(node.getRootId(), node.getRootId()));
                 }
-                if (node.getRootId() != null) {
+                if (node.getRootId() != null && node.getRootId() >= 0) {
                     Node root = getElementById(node.getRootId());
                     if (root != null) {
                         root.removeChildren(node.getId());
-                        root.addChildren(generateItemId());
+                        root.addChildren(newId);
                         if (!root.isValid())
                             node.setValid(false);
                     }
                 }
-                node.setId(generateItemId());
+                node.setId(newId);
             }
             addData(node);
             if (!node.isValid()) {
