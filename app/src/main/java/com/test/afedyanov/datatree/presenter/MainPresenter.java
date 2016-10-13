@@ -94,5 +94,6 @@ public class MainPresenter extends BasePresenter<IMainView> implements IMainPres
     public void apply() {
         localCache.updateSavedElements(dataBase.applyChanges(localCache.getNodes()));
         view.notifyDataBaseDataChanged();
+        view.notifyCacheDataChanged();
     }
 }

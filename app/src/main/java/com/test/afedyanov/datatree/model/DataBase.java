@@ -28,8 +28,8 @@ public class DataBase extends BaseTreeSet {
 
     /**
      * @param newNodes nodes to save, for new created node id must be negative!!!
-     * @return id of elements witch was created as {@link SparseArray} with key - sent element id
-     * value - new value of node
+     * @return id of elements witch was created as {@link SparseArray} with key - element id which was sent
+     * value - node after saving on data base
      */
     public SparseArray<Node> applyChanges(List<Node> newNodes) {
         Collections.sort(newNodes, new Comparator<Node>() {
@@ -38,12 +38,12 @@ public class DataBase extends BaseTreeSet {
                 return left.getId() > right.getId() ?  - 1 : left.getId() == right.getId() ?  0 : 1; // apply changes to old nodes first
             }
         });
-        SparseArray<Node> savedNodes = new SparseArray<>();
+        SparseIntArray newIds = new SparseIntArray();
         for (Node node : newNodes) {
-            int oldId = node.getId();
+            int originalId = node.getId();
             if (node.getId() < 0) {// new item
                 if (node.getRootId() != null && node.getRootId() < 0) {
-                    node.setRootId(savedNodes.get(node.getRootId()).getId());
+                    node.setRootId(newIds.get(node.getRootId(), node.getRootId()));
                 }
                 if (node.getRootId() != null) {
                     Node root = getElementById(node.getRootId());
@@ -60,10 +60,20 @@ public class DataBase extends BaseTreeSet {
             if (!node.isValid()) {
                 removeBranch(node);
             }
-            savedNodes.put(oldId, Node.copy(node));
+            newIds.put(originalId, node.getId());
         }
         orderElements();
-        return savedNodes;
+        return getUpdatedElements(newIds);
+    }
+
+    private SparseArray<Node> getUpdatedElements(SparseIntArray updatedIds) {
+        SparseArray<Node> updatedNodes = new SparseArray<>();
+        for (int i = 0; i < updatedIds.size(); i++) {
+            int oldId = updatedIds.keyAt(i);
+            Node updatedNode = getElementById(updatedIds.get(oldId));
+            updatedNodes.put(oldId, Node.copy(updatedNode));
+        }
+        return updatedNodes;
     }
 
     private void addData(Node node) {
