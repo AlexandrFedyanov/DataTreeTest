@@ -92,7 +92,7 @@ public class MainPresenter extends BasePresenter<IMainView> implements IMainPres
 
     @Override
     public void apply() {
-        localCache.setCreatedElementsIds(dataBase.applyChanges(localCache.getNodes()));
+        localCache.updateSavedElements(dataBase.applyChanges(localCache.getNodes()));
         view.notifyDataBaseDataChanged();
     }
 }

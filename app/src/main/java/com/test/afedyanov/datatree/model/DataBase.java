@@ -1,5 +1,6 @@
 package com.test.afedyanov.datatree.model;
 
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import java.util.Collections;
@@ -27,42 +28,42 @@ public class DataBase extends BaseTreeSet {
 
     /**
      * @param newNodes nodes to save, for new created node id must be negative!!!
-     * @return id of elements witch was created as {@link SparseIntArray} with key - new element
-     * sent id value, value - new generated id value
+     * @return id of elements witch was created as {@link SparseArray} with key - sent element id
+     * value - new value of node
      */
-    public SparseIntArray applyChanges(List<Node> newNodes) {
+    public SparseArray<Node> applyChanges(List<Node> newNodes) {
         Collections.sort(newNodes, new Comparator<Node>() {
             @Override
             public int compare(Node left, Node right) {
                 return left.getId() > right.getId() ?  - 1 : left.getId() == right.getId() ?  0 : 1; // apply changes to old nodes first
             }
         });
-        SparseIntArray generatedIds = new SparseIntArray();
+        SparseArray<Node> savedNodes = new SparseArray<>();
         for (Node node : newNodes) {
+            int oldId = node.getId();
             if (node.getId() < 0) {// new item
-                int newId = ++createdNodesCounter;
-                generatedIds.put(node.getId(), newId);
                 if (node.getRootId() != null && node.getRootId() < 0) {
-                    node.setRootId(generatedIds.get(node.getRootId(), node.getRootId()));
+                    node.setRootId(savedNodes.get(node.getRootId()).getId());
                 }
-                if (node.getRootId() >= 0) {
+                if (node.getRootId() != null) {
                     Node root = getElementById(node.getRootId());
                     if (root != null) {
                         root.removeChildren(node.getId());
-                        root.addChildren(newId);
+                        root.addChildren(generateItemId());
                         if (!root.isValid())
                             node.setValid(false);
                     }
                 }
-                node.setId(newId);
+                node.setId(generateItemId());
             }
             addData(node);
             if (!node.isValid()) {
                 removeBranch(node);
             }
+            savedNodes.put(oldId, Node.copy(node));
         }
         orderElements();
-        return generatedIds;
+        return savedNodes;
     }
 
     private void addData(Node node) {
@@ -76,9 +77,9 @@ public class DataBase extends BaseTreeSet {
     private void fillData() {
         Node treeRoot = new Node();
         treeRoot.setId(createdNodesCounter);
-        treeRoot.setValue(baseNodeName + ++createdNodesCounter);
+        treeRoot.setValue(baseNodeName + generateItemId());
         addData(treeRoot);
-        addChilds(treeRoot, getChildCount(createdNodesCounter), 0, 5);
+        addChilds(treeRoot, getChildCount(treeRoot.getId()), 0, 5);
         orderElements();
     }
 
@@ -88,17 +89,21 @@ public class DataBase extends BaseTreeSet {
         for (int i = 0; i < childCount; i++) {
             Node child = new Node();
             child.setId(createdNodesCounter);
-            child.setValue(baseNodeName + ++createdNodesCounter);
+            child.setValue(baseNodeName + generateItemId());
             child.setRootId(root.getId());
             root.addChildren(child.getId());
             addData(child);
             if (currentDepth != maxDepth) {
-                addChilds(child, getChildCount(createdNodesCounter), currentDepth + 1, maxDepth);
+                addChilds(child, getChildCount(child.getId()), currentDepth + 1, maxDepth);
             }
         }
     }
 
     private int getChildCount(int currentNode) {
         return childPseudorandomCount[currentNode - childPseudorandomCount.length * (currentNode/childPseudorandomCount.length)];
+    }
+
+    private int generateItemId() {
+        return ++createdNodesCounter;
     }
 }

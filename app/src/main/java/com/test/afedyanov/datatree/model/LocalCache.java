@@ -1,5 +1,6 @@
 package com.test.afedyanov.datatree.model;
 
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import java.util.ArrayList;
@@ -28,8 +29,10 @@ public class LocalCache extends BaseTreeSet {
         if (sameNode != null)
             mergeNode(node, sameNode);
         nodes.put(node.getId(), node);
-        if (checkIsDeleted(node))
+        if (checkIsDeleted(node)) {
             node.setValid(false);
+            removeBranch(node);
+        }
         orderElements();
     }
 
@@ -58,24 +61,21 @@ public class LocalCache extends BaseTreeSet {
         addNode(node);
     }
 
-    public void setCreatedElementsIds(SparseIntArray generatedIds) {
-        for (int i = 0; i < generatedIds.size(); i++) {
-            int localId = generatedIds.keyAt(i);
-            Node node = getElementById(localId);
-            if (node != null) {
-                node.setId(generatedIds.get(localId));
-                nodes.remove(localId);
-                nodes.put(node.getId(), node);
-                for (int childId: node.getNodesIds()) {
-                    Node child = getElementById(childId);
-                    if (child != null)
-                        child.setRootId(node.getId());
-                }
-                Node root = getElementById(node.getRootId());
-                if (root != null) {
-                    root.removeChildren(localId);
-                    root.addChildren(node.getId());
-                }
+    public void updateSavedElements(SparseArray<Node> savedElements) {
+        for (int i = 0; i < savedElements.size(); i++) {
+            int localId = savedElements.keyAt(i);
+            Node savedNode = savedElements.get(localId);
+            nodes.remove(localId);
+            nodes.put(savedNode.getId(), savedNode);
+            for (int childId: savedNode.getNodesIds()) {
+                Node child = getElementById(childId);
+                if (child != null)
+                    child.setRootId(savedNode.getId());
+            }
+            Node root = getElementById(savedNode.getRootId());
+            if (root != null) {
+                root.removeChildren(localId);
+                root.addChildren(savedNode.getId());
             }
         }
         orderElements();
