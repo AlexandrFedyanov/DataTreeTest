@@ -4,6 +4,7 @@ import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -55,7 +56,14 @@ public class BaseTreeSet implements ITreeDataSet {
 
     private int addElementToOrder(Node node, int currentPosition) {
         orderedIds[currentPosition++] = node.getId();
-        for (int childId : node.getNodesIds()) {
+        List<Integer> childs = node.getNodesIds();
+        Collections.sort(childs, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer left, Integer right) {
+                return left > right ? 0 : 1;
+            }
+        });
+        for (int childId : childs) {
             Node child = getElementById(childId);
             if (child != null)
                 currentPosition = addElementToOrder(child, currentPosition);
