@@ -3,6 +3,7 @@ package com.test.afedyanov.datatree.model;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -27,58 +28,63 @@ public class DataBase extends BaseTreeSet {
     }
 
     /**
-     * @param newNodes nodes to save, for new created node id must be negative!!!
-     * @return id of elements witch was created as {@link SparseArray} with key - element id which was sent
-     * value - node after saving on data base
+     * @param updatedNodes nodes to save, for new created node id must be negative!!!
+     * @return List of updated nodes
      */
-    public SparseArray<Node> applyChanges(List<Node> newNodes) {
-        Collections.sort(newNodes, new Comparator<Node>() {
-            @Override
-            public int compare(Node left, Node right) {
-                return left.getId() > right.getId() ?  - 1 : left.getId() == right.getId() ?  0 : 1; // apply changes to old nodes first
-            }
-        });
+    public List<Node> applyChanges(List<Node> updatedNodes, int[] cachedNodesId) {
         SparseIntArray newIds = new SparseIntArray();
-        for (Node node : newNodes) {
+        List<Integer> updatedElementsIds = new ArrayList<>();
+        for (Node node : updatedNodes) {
             int originalId = node.getId();
-            if (node.getId() < 0) {// new item
-                int newId = generateItemId();
-                if (node.getRootId() != null && node.getRootId() < 0) {
-                    node.setRootId(newIds.get(node.getRootId(), node.getRootId()));
-                }
-                if (node.getRootId() != null && node.getRootId() >= 0) {
-                    Node root = getElementById(node.getRootId());
-                    if (root != null) {
-                        root.removeChildren(node.getId());
-                        root.addChildren(newId);
-                        if (!root.isValid())
-                            node.setValid(false);
-                    }
-                }
-                node.setId(newId);
-            }
-            addData(node);
-            if (!node.isValid()) {
-                removeBranch(node);
-            }
+            if (node.getId() < 0)
+                node.setId(generateItemId());
             newIds.put(originalId, node.getId());
         }
-        orderElements();
-        return getUpdatedElements(newIds);
-    }
-
-    private SparseArray<Node> getUpdatedElements(SparseIntArray updatedIds) {
-        SparseArray<Node> updatedNodes = new SparseArray<>();
-        for (int i = 0; i < updatedIds.size(); i++) {
-            int oldId = updatedIds.keyAt(i);
-            Node updatedNode = getElementById(updatedIds.get(oldId));
-            updatedNodes.put(oldId, Node.copy(updatedNode));
+        for (Node node : updatedNodes) {
+            for (int childId : node.getNodesIds()) {
+                if (childId < 0) {
+                    node.getNodesIds().set(node.getNodesIds().indexOf(childId), newIds.get(childId));
+                }
+            }
+            if (node.getRootId() != null && node.getRootId() < 0)
+                node.setRootId(newIds.get(node.getRootId()));
+            node = addData(node);
+            updatedElementsIds.add(node.getId());
+            if (!node.isValid()) {
+                Integer[] updatedChildIds = removeBranch(node);
+                for (Integer updatedChildId : updatedChildIds) {
+                    for (int cachedNodeId : cachedNodesId) {
+                        if (cachedNodeId < 0)
+                            cachedNodeId = newIds.get(cachedNodeId);
+                        if (cachedNodeId == updatedChildId) {
+                            updatedElementsIds.add(updatedChildId);
+                            break;
+                        }
+                    }
+                }
+            }
         }
-        return updatedNodes;
+        orderElements();
+        return getUpdatedElements(updatedElementsIds);
     }
 
-    private void addData(Node node) {
-        nodes.put(node.getId(), node);
+    private List<Node> getUpdatedElements(List<Integer> updatedNodesIds) {
+        List<Node> nodes = new ArrayList<>();
+        for (Integer updatedNodeId : updatedNodesIds) {
+            nodes.add(Node.copy(getElementById(updatedNodeId)));
+        }
+        return nodes;
+    }
+
+    private Node addData(Node node) {
+        Node originalNode = getElementById(node.getId());
+        if (originalNode == null) {
+            nodes.put(node.getId(), node);
+            return node;
+        } else {
+            originalNode.update(node);
+        }
+        return originalNode;
     }
 
     public Node loadNodeById(int id) {
@@ -117,4 +123,5 @@ public class DataBase extends BaseTreeSet {
     private int generateItemId() {
         return ++createdNodesCounter;
     }
+
 }

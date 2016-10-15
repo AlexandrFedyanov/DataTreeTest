@@ -19,9 +19,18 @@ public class Node {
         copiedNode.setId(node.getId());
         copiedNode.setRootId(node.getRootId());
         copiedNode.setValue(node.getValue());
-        copiedNode.getNodesIds().addAll(node.getNodesIds());
         copiedNode.setValid(node.isValid());
         return copiedNode;
+    }
+
+    public void update(Node newNode) {
+        setValid(newNode.isValid());
+        setRootId(newNode.getRootId());
+        setId(newNode.getId());
+        setValue(newNode.getValue());
+        for (int child: newNode.getNodesIds()) {
+            addChildren(child);
+        }
     }
 
     public boolean isValid() {
@@ -53,7 +62,12 @@ public class Node {
     }
 
     public void addChildren(int nodeId) {
-        nodesIds.add(nodeId);
+        if (!hasSameChild(nodeId))
+            nodesIds.add(nodeId);
+    }
+
+    public void addChildren(List<Integer> childs) {
+        nodesIds.addAll(childs);
     }
 
     public void removeChildren(int nodeId) {
@@ -73,6 +87,14 @@ public class Node {
         this.id = id;
     }
 
+    private boolean hasSameChild(int childId) {
+        for (int oldChildId : getNodesIds()) {
+            if (childId == oldChildId) {
+                return true;
+            }
+        }
+        return false;
+    }
     @Override
     public boolean equals(Object o) {
         if (o instanceof Node) {

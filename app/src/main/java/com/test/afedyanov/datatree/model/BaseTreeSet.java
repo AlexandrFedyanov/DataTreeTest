@@ -3,6 +3,7 @@ package com.test.afedyanov.datatree.model;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -74,14 +75,22 @@ public class BaseTreeSet implements ITreeDataSet {
         return roots;
     }
 
-    protected void removeBranch(Node root) {
+
+    /**
+     * @param root node which was removed
+     * @return ids of removed elements
+     */
+    protected Integer[] removeBranch(Node root) {
+        List<Integer> removedElements = new ArrayList<>();
         for (int childId : root.getNodesIds()) {
             Node child = getElementById(childId);
             if (child != null) {
                 child.setValid(false);
-                removeBranch(child);
+                removedElements.add(childId);
+                Collections.addAll(removedElements, removeBranch(child));
             }
         }
+        return removedElements.toArray(new Integer[removedElements.size()]);
     }
 
 }

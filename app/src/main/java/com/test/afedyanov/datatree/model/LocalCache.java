@@ -1,53 +1,52 @@
 package com.test.afedyanov.datatree.model;
 
-import android.util.SparseArray;
-import android.util.SparseIntArray;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class LocalCache extends BaseTreeSet {
 
     private int createdNodesCounter = 0;
+    private List<Integer> changedNodesId = new ArrayList<>();
 
-    public List<Node> getNodes() {
+    public List<Node> getChangedNodes() {
         List<Node> copiedNodes = new ArrayList<>();
-        for(int i = 0; i < nodes.size(); i++) {
-            int key = nodes.keyAt(i);
-            copiedNodes.add(Node.copy(nodes.get(key)));
+        for(int i : changedNodesId) {
+            Node cachedNode = nodes.get(i);
+            Node copiedNode = Node.copy(cachedNode);
+            copiedNode.addChildren(cachedNode.getNodesIds());
+            copiedNodes.add(copiedNode);
         }
         return copiedNodes;
+    }
+
+    public int[] getCachedNodesIds() {
+        int[] ids = new int[nodes.size()];
+        for (int i = 0; i < nodes.size(); i++)
+            ids[i] = nodes.keyAt(i);
+        return ids;
     }
 
     public void clear() {
         nodes.clear();
         createdNodesCounter = 0;
+        changedNodesId.clear();
     }
 
     public void addNode(Node node) {
-        Node sameNode = getElementById(node.getId());
-        if (sameNode != null)
-            mergeNode(node, sameNode);
+        node.addChildren(findChilds(node));
+        Node root = getElementById(node.getRootId());
+        if (root != null) {
+            root.addChildren(node.getId());
+            setNodeHasChanges(root.getId());
+        }
         nodes.put(node.getId(), node);
         if (checkIsDeleted(node)) {
             node.setValid(false);
-            removeBranch(node);
+            Integer removedElementsIds[] = removeBranch(node);
+            for (Integer id : removedElementsIds)
+                setNodeHasChanges(id);
         }
         orderElements();
-    }
-
-    private void mergeNode(Node newNode, Node oldNode) {
-        for (int oldChildId : oldNode.getNodesIds()) {
-            boolean hasSameChild = false;
-            for (int newChildId: newNode.getNodesIds()) {
-                if (newChildId == oldChildId) {
-                    hasSameChild = true;
-                    break;
-                }
-            }
-            if (!hasSameChild)
-                newNode.addChildren(oldChildId);
-        }
     }
 
     public void createNode(int rootId, String value) {
@@ -55,36 +54,57 @@ public class LocalCache extends BaseTreeSet {
         node.setId(node.getId() - createdNodesCounter++);
         node.setValue(value);
         node.setRootId(rootId);
-        Node root = getElementById(rootId);
-        if (root != null)
-            root.addChildren(node.getId());
         addNode(node);
+        setNodeHasChanges(node.getId());
     }
 
-    public void updateSavedElements(SparseArray<Node> savedElements) {
-        for (int i = 0; i < savedElements.size(); i++) {
-            int localId = savedElements.keyAt(i);
-            Node savedNode = savedElements.get(localId);
-            if (localId != savedNode.getId()) {
-                nodes.remove(localId);
-                nodes.put(savedNode.getId(), savedNode);
-            } else
-                addNode(savedNode);
+    public void updateSavedElements(List<Node> updatedNodes) {
+        for(int i : changedNodesId) {
+            nodes.remove(i);
         }
-        orderElements();
+        changedNodesId.clear();
+        for (Node node : updatedNodes) {
+            addNode(node);
+        }
     }
 
     public void editNode(int nodeId, String value) {
         getElementById(nodeId).setValue(value);
+        setNodeHasChanges(nodeId);
     }
 
     public void setDeleted(Node node) {
         node.setValid(false);
+        setNodeHasChanges(node.getId());
         removeBranch(node);
     }
 
     private boolean checkIsDeleted(Node node) {
         Node root = getElementById(node.getRootId());
         return root != null && !root.isValid();
+    }
+
+    private List<Integer> findChilds(Node root) {
+        List<Integer> childs = new ArrayList<>();
+        for(int i = 0; i < nodes.size(); i++) {
+            int key = nodes.keyAt(i);
+            Node child = getElementById(key);
+            if (child != null) {
+                if (child.getRootId() != null && child.getRootId() == root.getId()) {
+                    childs.add(key);
+                }
+            }
+        }
+        return childs;
+    }
+
+    private void setNodeHasChanges(int nodeId) {
+        boolean alreadyChanged = false;
+        for (int id : changedNodesId) {
+            if (id == nodeId)
+                alreadyChanged = true;
+        }
+        if (!alreadyChanged)
+            changedNodesId.add(nodeId);
     }
 }
