@@ -48,10 +48,10 @@ public class DataBase extends BaseTreeSet {
             }
             if (node.getRootId() != null && node.getRootId() < 0) {
                 node.setRootId(newIds.get(node.getRootId()));
-                Node root = getElementById(node.getRootId());
-                if (root != null && !root.isValid()) {
-                        node.setValid(false);
-                }
+            }
+            Node root = getElementById(node.getRootId());
+            if (root != null && !root.isValid()) {
+                node.setValid(false);
             }
             node = addData(node);
             updatedElementsIds.add(node.getId());
